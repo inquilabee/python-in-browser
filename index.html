@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="./mini-coi.js" scope="./"></script>
+    <link rel="stylesheet"
+    href="https://pyscript.net/releases/2024.1.1/core.css" />
+    <script type="module"
+    src="https://pyscript.net/releases/2024.1.1/core.js">
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/theme/oceanic-next.min.css" integrity="sha512-FwT1Tb3zGyW38yUXfHlEHkzHiD0ztaLsULKFmuoP0mcWRK3mKFUzvAIE9Sue2YBAoAUjSCqMXCX8mKC/keNsYg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/codemirror.min.css" integrity="sha512-uf06llspW44/LZpHzHT6qBOIVODjWtv4MxCricRxkzvopAlSWnTf6hpZTFxuuZcuNE9CBQhqE0Seu1CoRk84nQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body>
+    <div class="hello">
+        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ut dolor earum magni ad laudantium aut atque nulla neque. Iste saepe possimus dignissimos maiores molestiae quis quasi aspernatur temporibus adipisci. Saepe?</p>
+    </div>
+
+    <div id="code-box">
+
+    </div>
+
+    <div id="github-gist" style="display: none;">
+        <script src="https://gist.github.com/qtalen/8f0323f9c9e3e550cab56c78fd8bd764.js"></script>
+    </div>
+
+    <!-- <script type="py-editor" terminal worker>
+        import sys
+        print(sys.version)
+    </script>
+
+    <script type="py" terminal worker>
+
+        import code
+
+        code.interact()
+
+        import sys
+        print(sys.version)
+        print("hello world")
+    </script> -->
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/codemirror.min.js" integrity="sha512-8RnEqURPUc5aqFEN04aQEiPlSAdE0jlFS/9iGgUyNtwFnSKCXhmB6ZTNl7LnDtDWKabJIASzXrzD0K+LYexU9g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/mode/python/python.min.js" integrity="sha512-2M0GdbU5OxkGYMhakED69bw0c1pW3Nb0PeF3+9d+SnwN1ryPx3wiDdNqK3gSM7KAU/pEV+2tFJFbMKjKAahOkQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <script>
+        $("#github-gist").hide()
+        
+
+        text_arr =  $("#github-gist tr td:nth-child(2)").map(
+            function(i, el) { 
+                line_str = $(el).text()
+
+                if ($.trim(line_str) == "") {
+                    return ""
+                }
+                else {
+                    return line_str
+                }
+            }
+        ).get();
+        
+        code_text = text_arr.join("\n")
+
+        console.log(code_text)
+
+        CodeMirror(document.getElementById('code-box'), {
+            lineNumbers: true,
+            tabSize: 2,
+            mode: 'python',
+            value: code_text
+        });
+        
+    </script>
+</body>
+</html>
