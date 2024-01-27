@@ -5,6 +5,7 @@
 
     <link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css" />
     <script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
+    <link rel="stylesheet" href="github-gist.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/theme/dracula.min.css" integrity="sha512-gFMl3u9d0xt3WR8ZeW05MWm3yZ+ZfgsBVXLSOiFz2xeVrZ8Neg0+V1kkRIo9LikyA/T9HuS91kDfc2XWse0K0A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/theme/oceanic-next.min.css" integrity="sha512-FwT1Tb3zGyW38yUXfHlEHkzHiD0ztaLsULKFmuoP0mcWRK3mKFUzvAIE9Sue2YBAoAUjSCqMXCX8mKC/keNsYg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/codemirror.min.css" integrity="sha512-uf06llspW44/LZpHzHT6qBOIVODjWtv4MxCricRxkzvopAlSWnTf6hpZTFxuuZcuNE9CBQhqE0Seu1CoRk84nQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -18,9 +19,9 @@
 
     </div>
 
-    <div id="github-gist">
-        <script src="https://gist.github.com/qtalen/8f0323f9c9e3e550cab56c78fd8bd764.js"></script>
-    </div>
+    <div class="github-gist" data-gist-src="https://gist.github.com/qtalen/8f0323f9c9e3e550cab56c78fd8bd764.js"></div>
+    <div class="github-gist" data-gist-src="https://gist.github.com/qtalen/8f0323f9c9e3e550cab56c78fd8bd764.js"></div>
+
 
     <!-- <script type="py-editor" terminal worker>
         import sys
@@ -44,36 +45,32 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
     <script>
-        // $("#github-gist").hide()
-        
-        function getCodeFromGist() {
-            text_arr =  $("#github-gist .gist-file table tr td:nth-child(2)").map(
-            function(i, el) { 
-                line_str = $(el).text()
+        $(".github-gist").each(function (i, e) { 
+            let gist_link = $(e).attr("data-gist-src")
 
-                if ($.trim(line_str) == "") {
-                    return ""
-                }
-                else {
-                    return line_str
-                }
-            }).get();
-        
-            code_text = text_arr.join("\n")
+            let raw_gist_code_link = gist_link.replace(".js", "/raw/").replace("gist.github.com", "gist.githubusercontent.com")
 
-            console.log(code_text)
+            let code_box = $("<div class='code-box'> </div>") 
+            
+            $(e).append(code_box)
 
-            return code_text
-        }
+            console.log(raw_gist_code_link)
 
-        CodeMirror(document.getElementById('code-box'), {
-            lineNumbers: true,
-            tabSize: 2,
-            mode: 'python',
-            value: getCodeFromGist(),
-            theme: 'dracula'
-        });
-        
+            $.get(
+                    raw_gist_code_link, 
+                    data => {
+                                console.log(data)
+                                // use vanilla JS to select element below
+                                CodeMirror(e.querySelector(".code-box"), {
+                                    lineNumbers: true,
+                                    tabSize: 4,
+                                    mode: 'python',
+                                    value: data,
+                                    theme: 'dracula'
+                                });
+                        }
+                )
+        })
     </script>
 </body>
 </html>
