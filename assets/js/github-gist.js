@@ -2,6 +2,8 @@ import { asyncRun } from "../js/pyodide/py-worker.js";
 
 $(".github-gist").each(function (i, e) { 
     let gist_link = $(e).attr("data-gist-src")
+    let readonly = $(e).attr("data-editable") === "false"
+    let runnable = $(e).attr("data-runnable") === "true" 
 
     let raw_gist_code_link = gist_link.replace(".js", "/raw/").replace("gist.github.com", "gist.githubusercontent.com")
 
@@ -12,7 +14,7 @@ $(".github-gist").each(function (i, e) {
     $(e).append(code_box)
     $(e).append(output_box)
     $(e).append(code_run_button)
-
+    
     // console.log(raw_gist_code_link)
 
     $.get(
@@ -26,7 +28,7 @@ $(".github-gist").each(function (i, e) {
                             mode: 'python',
                             value: data,
                             theme: 'dracula',
-                            readOnly: false
+                            readOnly: readonly
                         });
 
                         async function codeRunner() {
@@ -35,11 +37,15 @@ $(".github-gist").each(function (i, e) {
                                 console.log(python_code)
 
                                 const { results, error } = await asyncRun(python_code);
-
-                                output_box.text(results)
                                 
-                                // console.log("Output:")
-                                // console.log(results)
+                                if (results) {
+                                        output_box.text(results)
+                                }
+                                else if (error) {
+                                        output_box.text(error)
+                                } else {
+                                        output_box.text("Something went horribly wrong!")  
+                                }                                
                         }
 
                         $(e).find(".code-run-btn:first").click(codeRunner);

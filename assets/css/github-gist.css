@@ -5,11 +5,11 @@
 }
 
 .github-gist .code-output-box {
-    background-color: rgb(85, 81, 81);
-    font-size: medium;
-    color: aqua;
+    background-color: rgb(21, 22, 22);
+    font-size: small;
+    color: rgb(166, 255, 0);
     margin: 10px;
     padding: 5px;
-    height: 60px;
+    height: 150px;
     overflow-y: scroll;
 }
