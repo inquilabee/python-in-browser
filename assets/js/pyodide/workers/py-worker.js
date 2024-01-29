@@ -1,4 +1,4 @@
-const pyodideWorker = new Worker("./assets/js/pyodide/webworker.js");
+const pyodideWorker = new Worker("./assets/js/pyodide/workers/webworker.js");
 
 const callbacks = {};
 
@@ -12,7 +12,7 @@ pyodideWorker.onmessage = (event) => {
 const asyncRun = (() => {
 
   return (script, context) => {
-    const id = Date.now().toString(); // Unique identifier for each run
+    const id = (Date.now() * Math.floor(Math.random()* 100)).toString(); // Unique identifier for each run
 
     return new Promise((onSuccess) => {
       callbacks[id] = onSuccess;
