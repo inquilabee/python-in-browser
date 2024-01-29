@@ -1,4 +1,4 @@
-import { asyncRun } from "../../py-worker.js";
+import { asyncRun } from "../js/pyodide/py-worker.js";
 
 $(".github-gist").each(function (i, e) { 
     let gist_link = $(e).attr("data-gist-src")
