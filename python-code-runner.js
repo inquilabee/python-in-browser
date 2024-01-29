@@ -1,23 +1,15 @@
+// test script 
+// do not use elsewhere
+
 import { asyncRun } from "./py-worker.js";
 
-// Console Output Redirection: https://stackoverflow.com/questions/56583696/how-to-redirect-render-pyodide-output-in-browser
 
-// Set stdout 
-let python_start_code = `
-import sys
-import io
-sys.stdout = io.StringIO()
-`
-
-
-async function main(script, context={}) {
+async function run_code(script, context={}) {
   try {
 
-    console.log("Running code", script)
+    // console.log("Running code", script)
 
     const { results, error } = await asyncRun(script, context);
-
-    console.log("result", results)
 
     if (results) {
       console.log("pyodideWorker return results: ", results);
@@ -31,20 +23,22 @@ async function main(script, context={}) {
   }
 }
 
-const py_script = `
-for i in range(20):
+let py_script = `
+import js
+
+for i in range(5):
     print(i)
 
 print("hello, world")
 
 import numpy as np
 
-np.mean([1, 2, 3, 4])
-`;
+print(np.mean(js.A_rank))
+`
 
 const py_context = {
   A_rank: [0.8, 0.4, 1.2, 3.7, 2.6, 5.8],
 };
 
 
-main(py_script, py_context);
+run_code(py_script, py_context);

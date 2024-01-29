@@ -6,9 +6,11 @@ $(".github-gist").each(function (i, e) {
     let raw_gist_code_link = gist_link.replace(".js", "/raw/").replace("gist.github.com", "gist.githubusercontent.com")
 
     let code_box = $("<div class='code-box'> </div>") 
+    let output_box = $("<div class='code-output-box'> </div>") 
     let code_run_button = $("<button class='code-run-btn'> </button>") 
     
     $(e).append(code_box)
+    $(e).append(output_box)
     $(e).append(code_run_button)
 
     // console.log(raw_gist_code_link)
@@ -32,8 +34,11 @@ $(".github-gist").each(function (i, e) {
 
                                 console.log(python_code)
 
-                                // const { results, error } = await asyncRun(python_code);
+                                const { results, error } = await asyncRun(python_code);
 
+                                output_box.text(results)
+                                
+                                // console.log("Output:")
                                 // console.log(results)
                         }
 

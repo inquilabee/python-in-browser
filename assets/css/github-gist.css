@@ -1,10 +1,15 @@
-.github-gist {
+.github-gist .code-box {
     margin: 10px;
     padding: 5px;
     border: 0cap;
 }
 
-.github-gist button {
-    padding: 10px;
-    margin: 5px;
+.github-gist .code-output-box {
+    background-color: rgb(85, 81, 81);
+    font-size: large;
+    color: aqua;
+    margin: 10px;
+    padding: 5px;
+    height: 30px;
+    overflow-y: scroll;
 }
