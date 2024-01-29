@@ -1,54 +1,68 @@
 import { asyncRun } from "../pyodide/workers/py-worker.js";
 
-$(".github-gist").each(function (i, e) { 
-    let gist_link = $(e).attr("data-gist-src")
-    let readonly = $(e).attr("data-editable") === "false"
-    let runnable = $(e).attr("data-runnable") === "true" 
+function createCodeMirrorEditor(element, data, readonly) {
+  return CodeMirror(element, {
+    lineNumbers: true,
+    tabSize: 4,
+    mode: 'python',
+    value: data,
+    theme: 'dracula',
+    keyMap: 'sublime',
+    readOnly: readonly
+  });
+}
 
-    let raw_gist_code_link = gist_link.replace(".js", "/raw/").replace("gist.github.com", "gist.githubusercontent.com")
+function initializeGistElement(gistElement) {
+  const gistLink = gistElement.attr("data-gist-src");
+  const readonly = gistElement.attr("data-editable") === "false";
+  const runnable = gistElement.attr("data-runnable") === "true";
+  
+  const rawGistCodeLink = gistLink.replace(".js", "/raw/").replace("gist.github.com", "gist.githubusercontent.com");
 
-    let code_box = $("<div class='code-box'> </div>") 
-    let output_box = $("<div class='code-output-box'> </div>") 
-    let code_run_button = $("<button class='code-run-btn'> </button>") 
-    
-    $(e).append(code_box)
-    $(e).append(output_box)
-    $(e).append(code_run_button)
-    
-    // console.log(raw_gist_code_link)
+  const codeBox = $("<div class='code-box'></div>");
+  const outputBox = $("<div class='code-output-box'></div>");
+  const runButton = $("<button class='code-run-btn'>Run</button>");
+  const clearButton = $("<button class='code-clear-btn'>Clear</button>");
+  const copyButton = $("<button class='code-copy-btn'>Copy</button>");
 
-    $.get(
-            raw_gist_code_link, 
-            data => {
-                        // console.log(data)
-                        // use vanilla JS to select element below
-                        const editor = CodeMirror(e.querySelector(".code-box"), {
-                            lineNumbers: true,
-                            tabSize: 4,
-                            mode: 'python',
-                            value: data,
-                            theme: 'dracula',
-                            readOnly: readonly
-                        });
+  gistElement.append(codeBox, outputBox, runButton, clearButton, copyButton);
 
-                        async function codeRunner() {
-                                let python_code = editor.getValue();
+  $.get(
+    rawGistCodeLink,
+    data => {
+      const editor = createCodeMirrorEditor(gistElement[0].querySelector(".code-box"), data, readonly);
 
-                                console.log(python_code)
+      const codeRunner = async () => {
+        const pythonCode = editor.getValue();
+        const { results, error } = await asyncRun(pythonCode);
 
-                                const { results, error } = await asyncRun(python_code);
-                                
-                                if (results) {
-                                        output_box.text(results)
-                                }
-                                else if (error) {
-                                        output_box.text(error)
-                                } else {
-                                        output_box.text("Something went horribly wrong!")  
-                                }                                
-                        }
+        if (error) {
+          outputBox.text(error);
+        } else {
+          outputBox.text(results);
+        }
+      };
 
-                        $(e).find(".code-run-btn:first").click(codeRunner);
-                }
-        )
-})
+      runButton.click(codeRunner);
+      clearButton.click(() => {
+        editor.setValue('');
+        outputBox.text('');
+      });
+      copyButton.click(() => {
+        const textToCopy = editor.getValue();
+        copyButton.prop('disabled', true);
+
+        navigator.clipboard.writeText(textToCopy)
+          .then(() => copyButton.prop('disabled', false))
+          .catch(err => {
+            console.error('Unable to copy text to clipboard', err);
+            copyButton.prop('disabled', false);
+          });
+      });
+    }
+  );
+}
+
+$(".github-gist").each((index, gistElement) => {
+  initializeGistElement($(gistElement));
+});

@@ -6,10 +6,16 @@
 
 .github-gist .code-output-box {
     background-color: rgb(21, 22, 22);
-    font-size: small;
+    font-size:medium;
     color: rgb(166, 255, 0);
     margin: 10px;
     padding: 5px;
     height: 150px;
     overflow-y: scroll;
+    white-space: pre-line;
+}
+
+.github-gist button {
+    margin: 5px;
+    padding: 2px;
 }
