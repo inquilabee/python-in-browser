@@ -23,33 +23,6 @@ async function run_code(script, context={}) {
   }
 }
 
-function prepare_code(python_code) {
-  return `
-import sys, io, traceback
-namespace = {}  # use separate namespace to hide run_code, modules, etc.
-
-def run_code():
-    """run specified code and return stdout and stderr"""
-    out = io.StringIO()
-    oldout = sys.stdout
-    olderr = sys.stderr
-    sys.stdout = sys.stderr = out
-
-    code = f"""${python_code}"""
-
-    try:
-        # change next line to exec(code, {}) if you want to clear vars each time
-        exec(code, namespace)
-    except:
-        traceback.print_exc()
-
-    sys.stdout = oldout
-    sys.stderr = olderr
-    return out.getvalue()
-
-run_code()
-`
-}
 
 let py_script_1 = `
 import js
@@ -76,6 +49,8 @@ import numpy as np
 
 print(np.mean(js.A_rank))
 
+print(__name__)
+
 if __name__ == "__main__":
     print("Hello" * 20)
 `
@@ -84,8 +59,5 @@ const py_context = {
   A_rank: [0.8, 0.4, 1.2, 3.7, 2.6, 5.8],
 };
 
-
-run_code(prepare_code(py_script_1), py_context); //works
-run_code(prepare_code(py_script_1), py_context); // workks
-run_code(py_script_2, py_context); // works
-// run_code(prepare_code(py_script_2), py_context); // does not run
+run_code(py_script_2, py_context);
+run_code(py_script_1, py_context); 

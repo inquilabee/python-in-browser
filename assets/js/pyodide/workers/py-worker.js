@@ -12,7 +12,9 @@ pyodideWorker.onmessage = (event) => {
 const asyncRun = (() => {
 
   return (script, context) => {
-    const id = (Date.now() * Math.floor(Math.random()* 100)).toString(); // Unique identifier for each run
+    const id = (Date.now() * Math.floor(Math.random()* 10000)).toString(); // Unique identifier for each run
+
+    // console.log(id)
 
     return new Promise((onSuccess) => {
       callbacks[id] = onSuccess;
