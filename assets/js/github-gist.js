@@ -1,5 +1,4 @@
-import { asyncRun } from "./py-worker.js";
-
+import { asyncRun } from "../../py-worker.js";
 
 $(".github-gist").each(function (i, e) { 
     let gist_link = $(e).attr("data-gist-src")
@@ -7,41 +6,38 @@ $(".github-gist").each(function (i, e) {
     let raw_gist_code_link = gist_link.replace(".js", "/raw/").replace("gist.github.com", "gist.githubusercontent.com")
 
     let code_box = $("<div class='code-box'> </div>") 
-    let output_box = $("<div id='code-box-output'> </div>") 
-    let run_button = $("<button class='run-code'> Run </button>")
-    let clear_button = $("<button class='clear-code'> Clear </button>")
-
+    let code_run_button = $("<button class='code-run-btn'> </button>") 
+    
     $(e).append(code_box)
-    $(e).append(output_box)
-    $(e).append(run_button)
-    $(e).append(clear_button)
+    $(e).append(code_run_button)
+
+    // console.log(raw_gist_code_link)
 
     $.get(
             raw_gist_code_link, 
             data => {
-                        
-                // use vanilla JS to select element below
-                let editor = CodeMirror(e.querySelector(".code-box"), {
-                    lineNumbers: true,
-                    tabSize: 4,
-                    mode: 'python',
-                    value: data,
-                    theme: 'dracula' // 'oceanic-next'
-                });
+                        // console.log(data)
+                        // use vanilla JS to select element below
+                        const editor = CodeMirror(e.querySelector(".code-box"), {
+                            lineNumbers: true,
+                            tabSize: 4,
+                            mode: 'python',
+                            value: data,
+                            theme: 'dracula',
+                            readOnly: false
+                        });
 
-                $(e).find(".run-code:first").click(
-                    async function() {
-                        // let current_code = editor.getValue();
-                        let current_code = "print('Hello, world')";
-                        
-                        let result = await asyncRun(current_code)
-                        
-                        console.log(current_code)
-                        console.log("Output", result)
+                        async function codeRunner() {
+                                let python_code = editor.getValue();
 
-                        // output_box.innerText = result
-                    }
-                )
-            }
+                                console.log(python_code)
+
+                                // const { results, error } = await asyncRun(python_code);
+
+                                // console.log(results)
+                        }
+
+                        $(e).find(".code-run-btn:first").click(codeRunner);
+                }
         )
 })

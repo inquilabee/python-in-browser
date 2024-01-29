@@ -40,47 +40,11 @@
         print("hello world")
     </script> -->
 
-    <script src="https://modularizer.github.io/pyprez/pyprez.js" mode="editor">
-        import numpy as np
-        print("testing")
-        np.random.rand(5)
-    </script>
-
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/codemirror.min.js" integrity="sha512-8RnEqURPUc5aqFEN04aQEiPlSAdE0jlFS/9iGgUyNtwFnSKCXhmB6ZTNl7LnDtDWKabJIASzXrzD0K+LYexU9g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/mode/python/python.min.js" integrity="sha512-2M0GdbU5OxkGYMhakED69bw0c1pW3Nb0PeF3+9d+SnwN1ryPx3wiDdNqK3gSM7KAU/pEV+2tFJFbMKjKAahOkQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
-    <script src="./assets/js/github-gist.js"></script>
-
-    <script>
-        $(".github-gist").each(function (i, e) { 
-            let gist_link = $(e).attr("data-gist-src")
-
-            let raw_gist_code_link = gist_link.replace(".js", "/raw/").replace("gist.github.com", "gist.githubusercontent.com")
-
-            let code_box = $("<div class='code-box'> </div>") 
-            
-            $(e).append(code_box)
-
-            // console.log(raw_gist_code_link)
-
-            $.get(
-                    raw_gist_code_link, 
-                    data => {
-                                console.log(data)
-                                // use vanilla JS to select element below
-                                CodeMirror(e.querySelector(".code-box"), {
-                                    lineNumbers: true,
-                                    tabSize: 4,
-                                    mode: 'python',
-                                    value: data,
-                                    theme: 'dracula',
-                                    readOnly: true
-                                });
-                        }
-                )
-        })
-    </script>
+    <script type="module" src="./assets/js/github-gist.js"></script>
+    <script type="module" src="./test.js"></script>
 </body>
 </html>
