@@ -1,5 +1,11 @@
 import { asyncRun } from "../pyodide/workers/py-worker.js";
 
+const CODE_BOX_CLASS = 'code-box';
+const CODE_OUTPUT_BOX_CLASS = 'code-output-box';
+const CODE_RUN_BTN_CLASS = 'code-run-btn';
+const CODE_CLEAR_BTN_CLASS = 'code-clear-btn';
+const CODE_COPY_BTN_CLASS = 'code-copy-btn';
+
 function createCodeMirrorEditor(element, data, readonly) {
   return CodeMirror(element, {
     lineNumbers: true,
@@ -12,57 +18,82 @@ function createCodeMirrorEditor(element, data, readonly) {
   });
 }
 
+function initializeCodeBlock(codeBlockElement) {
+  const readonly = codeBlockElement.attr("data-editable") === "false";
+  const initialCode = codeBlockElement.text().trim();
+  
+  const codeBox = $(`<div class='${CODE_BOX_CLASS}'></div>`);
+  const outputBox = $(`<div class='${CODE_OUTPUT_BOX_CLASS}'></div>`);
+  const runButton = $(`<button class='${CODE_RUN_BTN_CLASS}'>Run</button>`);
+  const clearButton = $(`<button class='${CODE_CLEAR_BTN_CLASS}'>Clear</button>`);
+  const copyButton = $(`<button class='${CODE_COPY_BTN_CLASS}'>Copy</button>`);
+
+  codeBlockElement.html('').append(codeBox, outputBox, runButton, clearButton, copyButton);
+  
+  const editor = createCodeMirrorEditor(codeBlockElement.find(`.${CODE_BOX_CLASS}`).get(0), initialCode, readonly);
+  attachButtonHandlers(editor, outputBox, runButton, clearButton, copyButton);
+}
+
 function initializeGistElement(gistElement) {
   const gistLink = gistElement.attr("data-gist-src");
   const readonly = gistElement.attr("data-editable") === "false";
-  const runnable = gistElement.attr("data-runnable") === "true";
-  
-  const rawGistCodeLink = gistLink.replace(".js", "/raw/").replace("gist.github.com", "gist.githubusercontent.com");
+  const rawGistCodeLink = gistLink ? gistLink.replace(".js", "/raw/").replace("gist.github.com", "gist.githubusercontent.com") : null;
 
-  const codeBox = $("<div class='code-box'></div>");
-  const outputBox = $("<div class='code-output-box'></div>");
-  const runButton = $("<button class='code-run-btn'>Run</button>");
-  const clearButton = $("<button class='code-clear-btn'>Clear</button>");
-  const copyButton = $("<button class='code-copy-btn'>Copy</button>");
+  const codeBox = $(`<div class='${CODE_BOX_CLASS}'></div>`);
+  const outputBox = $(`<div class='${CODE_OUTPUT_BOX_CLASS}'></div>`);
+  const runButton = $(`<button class='${CODE_RUN_BTN_CLASS}'>Run</button>`);
+  const clearButton = $(`<button class='${CODE_CLEAR_BTN_CLASS}'>Clear</button>`);
+  const copyButton = $(`<button class='${CODE_COPY_BTN_CLASS}'>Copy</button>`);
 
-  gistElement.append(codeBox, outputBox, runButton, clearButton, copyButton);
+  if (rawGistCodeLink) {
+    gistElement.append(codeBox, outputBox, runButton, clearButton, copyButton);
 
-  $.get(
-    rawGistCodeLink,
-    data => {
-      const editor = createCodeMirrorEditor(gistElement[0].querySelector(".code-box"), data, readonly);
+    $.get(rawGistCodeLink, data => {
+      const editor = createCodeMirrorEditor(gistElement.find(`.${CODE_BOX_CLASS}`).get(0), data, readonly);
+      attachButtonHandlers(editor, outputBox, runButton, clearButton, copyButton);
+    });
+  }
+}
 
-      const codeRunner = async () => {
-        const pythonCode = editor.getValue();
-        const { results, error } = await asyncRun(pythonCode);
+function attachButtonHandlers(editor, outputBox, runButton, clearButton, copyButton) {
+  const codeRunner = async () => {
+    const pythonCode = editor.getValue();
+    try {
+      const { results, error } = await asyncRun(pythonCode);
 
-        if (error) {
-          outputBox.text(error);
-        } else {
-          outputBox.text(results);
-        }
-      };
-
-      runButton.click(codeRunner);
-      clearButton.click(() => {
-        editor.setValue('');
-        outputBox.text('');
-      });
-      copyButton.click(() => {
-        const textToCopy = editor.getValue();
-        copyButton.prop('disabled', true);
-
-        navigator.clipboard.writeText(textToCopy)
-          .then(() => copyButton.prop('disabled', false))
-          .catch(err => {
-            console.error('Unable to copy text to clipboard', err);
-            copyButton.prop('disabled', false);
-          });
-      });
+      if (error) {
+        outputBox.text(error);
+      } else {
+        outputBox.text(results);
+      }
+    } catch (error) {
+      console.error('Error during code execution:', error);
+      outputBox.text('Error during code execution. Check console for details.');
     }
-  );
+  };
+
+  runButton.click(codeRunner);
+  clearButton.click(() => {
+    editor.setValue('');
+    outputBox.text('');
+  });
+  copyButton.click(() => {
+    const textToCopy = editor.getValue();
+    copyButton.prop('disabled', true);
+
+    navigator.clipboard.writeText(textToCopy)
+      .then(() => copyButton.prop('disabled', false))
+      .catch(err => {
+        console.error('Unable to copy text to clipboard', err);
+        copyButton.prop('disabled', false);
+      });
+  });
 }
 
 $(".github-gist").each((index, gistElement) => {
   initializeGistElement($(gistElement));
+});
+
+$(".code-block").each((index, codeElement) => {
+  initializeCodeBlock($(codeElement));
 });
