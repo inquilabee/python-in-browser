@@ -1,11 +1,26 @@
 import { asyncRun } from "../pyodide/workers/py-worker.js";
 import { formatPython } from "../utils/py-format.js"
 
+// button classes
+
 const CODE_BOX_CLASS = 'code-box';
 const CODE_OUTPUT_BOX_CLASS = 'code-output-box';
 const CODE_RUN_BTN_CLASS = 'code-run-btn';
 const CODE_CLEAR_BTN_CLASS = 'code-clear-btn';
 const CODE_COPY_BTN_CLASS = 'code-copy-btn';
+
+// Console messages
+
+const CODE_RUNNING_MESSAGE = '[Started running code]<hr>';
+const CODE_FINISHED_MESSAGE = '<hr>[Finished running code]';
+const CODE_ERROR_MESSAGE  ='Error during code execution. Check console for details.'
+
+// text colors for messages
+
+const CODE_START_END_MESSAGE_COLOR = "white"
+const CODE_ERROR_TEXT_COLOR = 'red';
+
+const formatMessage = (message, colour) => `<span style="color:${colour}">${message}</span>`;
 
 function createCodeMirrorEditor(element, data, readonly) {
   return CodeMirror(element, {
@@ -64,17 +79,23 @@ function initializeGistElement(gistElement) {
 function attachButtonHandlers(editor, outputBox, runButton, clearButton, copyButton) {
   const codeRunner = async () => {
     const pythonCode = editor.getValue();
-    try {
-      const { results, error } = await asyncRun(pythonCode);
 
-      if (error) {
-        outputBox.text(error);
-      } else {
-        outputBox.text(results);
-      }
+    try {
+        outputBox.text('')
+        outputBox.append(formatMessage(CODE_RUNNING_MESSAGE, CODE_START_END_MESSAGE_COLOR));
+
+        const { results, error } = await asyncRun(pythonCode);
+
+        if (error) {
+            outputBox.append(formatMessage(CODE_ERROR_MESSAGE, CODE_ERROR_TEXT_COLOR));
+        } else {
+            outputBox.append(results);
+        }
     } catch (error) {
-      console.error('Error during code execution:', error);
-      outputBox.text('Error during code execution. Check console for details.');
+        console.error('Error during code execution:', error);
+        outputBox.append(formatMessage(CODE_ERROR_MESSAGE, CODE_ERROR_TEXT_COLOR));
+    } finally {
+        outputBox.append(formatMessage(CODE_FINISHED_MESSAGE, CODE_START_END_MESSAGE_COLOR));
     }
   };
 
