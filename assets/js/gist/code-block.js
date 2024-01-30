@@ -41,7 +41,7 @@ function initializeCodeBlock(codeBlockElement) {
   // const initialCode = codeBlockElement[0].innerText.trim().replace(/\r\n|\r|\n/g, '\n');
   const initialCode = formatPython(codeBlockElement.text())
 
-  console.log(initialCode)
+  // console.log(initialCode)
   
   const codeBox = $(`<div class='${CODE_BOX_CLASS}'></div>`);
   const outputBox = $(`<div class='${CODE_OUTPUT_BOX_CLASS}'></div>`);

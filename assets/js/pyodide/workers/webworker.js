@@ -6,6 +6,17 @@ importScripts("https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js");
 // Console Output Redirection: https://stackoverflow.com/questions/56583696/how-to-redirect-render-pyodide-output-in-browser
 // https://github.com/pyodide/pyodide/issues/8#issuecomment-772024841
 
+function generateUniqueString(length = 8) {
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let randomString = '';
+
+  for (let i = 0; i < length; i++) {
+      const randomIndex = Math.floor(Math.random() * characters.length);
+      randomString += characters.charAt(randomIndex);
+  }
+
+  return randomString;
+}
 
 function setup_pyodide() {
   // setup pyodide environment to run code blocks as needed
@@ -51,7 +62,7 @@ self.onmessage = async (event) => {
   try {
     await self.pyodide.loadPackagesFromImports(python);
 
-    const random_var = `code_to_run_${Math.floor(Math.random() * 1000000)}`
+    const random_var = `code_to_run_${generateUniqueString(10)}`
 
     // console.log(random_var)
 

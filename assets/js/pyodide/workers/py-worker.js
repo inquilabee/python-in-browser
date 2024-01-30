@@ -1,3 +1,5 @@
+import { generateUniqueString } from "../../utils/identifier.js";
+
 const pyodideWorker = new Worker("./assets/js/pyodide/workers/webworker.js");
 
 const callbacks = {};
@@ -12,7 +14,7 @@ pyodideWorker.onmessage = (event) => {
 const asyncRun = (() => {
 
   return (script, context) => {
-    const id = (Date.now() * Math.floor(Math.random()* 10000)).toString(); // Unique identifier for each run
+    const id = generateUniqueString()
 
     // console.log(id)
 
