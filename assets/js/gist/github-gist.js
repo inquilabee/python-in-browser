@@ -1,4 +1,5 @@
 import { asyncRun } from "../pyodide/workers/py-worker.js";
+import { formatPython } from "../utils/py-format.js"
 
 const CODE_BOX_CLASS = 'code-box';
 const CODE_OUTPUT_BOX_CLASS = 'code-output-box';
@@ -20,7 +21,12 @@ function createCodeMirrorEditor(element, data, readonly) {
 
 function initializeCodeBlock(codeBlockElement) {
   const readonly = codeBlockElement.attr("data-editable") === "false";
-  const initialCode = codeBlockElement.text().trim();
+
+  // maintain formatting of original text content
+  // const initialCode = codeBlockElement[0].innerText.trim().replace(/\r\n|\r|\n/g, '\n');
+  const initialCode = formatPython(codeBlockElement.text())
+
+  console.log(initialCode)
   
   const codeBox = $(`<div class='${CODE_BOX_CLASS}'></div>`);
   const outputBox = $(`<div class='${CODE_OUTPUT_BOX_CLASS}'></div>`);
