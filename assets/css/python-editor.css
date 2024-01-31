@@ -1,0 +1,57 @@
+/* CodeMirror Settings */
+
+.CodeMirror {
+    /* font-family: Arial, monospace; */
+    font-size: 12px;
+    height: 180px;
+}
+
+.CodeMirror-wrap pre {
+    word-break: break-word;
+}
+
+/* Main Editor */
+
+.code-editor .column {
+  padding: 0px;
+}
+
+.code-editor {
+  margin-top: 5px;
+  /* background-color: yellowgreen; */
+  padding: 20px 18px 20px 18px;
+  border: solid #88f0d2 1px;
+  resize: vertical;
+}
+
+/* title settings */
+
+.code-editor .code-title {
+    height: 30px;
+    background-color: rgb(174, 196, 80); 
+    color: rgb(0, 0, 0); 
+    padding: 5px;
+}
+
+.code-editor .code-output-title {
+    height: 30px;
+    background-color: #d9ed7f; 
+    color: rgb(0, 0, 0); 
+    padding: 5px;
+}
+
+/* editor and output settings */
+
+/* .code-editor .code-content {
+    max-height: 180px;
+    overflow-y: scroll;
+} */
+
+.code-editor .code-output-content{
+    background-color: #293052;
+    color: rgb(206, 223, 206);
+    height: 180px;
+    max-height: 180px;
+    overflow-y: auto;
+    white-space: pre-line;
+}
