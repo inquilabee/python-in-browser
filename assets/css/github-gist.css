@@ -1,12 +1,14 @@
-.github-gist .code-box, .code-block .code-box  {
+.github-gist .code-box,
+.code-block .code-box {
     margin: 10px;
     padding: 5px;
     border: 0cap;
 }
 
-.github-gist .code-output-box, .code-block .code-output-box {
+.github-gist .code-output-box,
+.code-block .code-output-box {
     background-color: rgb(21, 22, 22);
-    font-size:medium;
+    font-size: medium;
     color: rgb(166, 255, 0);
     margin: 10px;
     padding: 5px;
@@ -15,7 +17,8 @@
     white-space: pre-line;
 }
 
-.github-gist button, .code-block button {
+.github-gist button,
+.code-block button {
     margin: 5px;
     padding: 2px;
 }

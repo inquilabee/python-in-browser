@@ -2,16 +2,18 @@ import { asyncRun } from "../pyodide/workers/py-worker.js";
 
 // Console messages
 
-const CODE_RUNNING_MESSAGE = '[Started running code]<hr>';
-const CODE_FINISHED_MESSAGE = '<hr>[Finished running code]';
-const CODE_ERROR_MESSAGE  ='Error during code execution. Check console for details.'
+const CODE_RUNNING_MESSAGE = "[Started running code]<hr>";
+const CODE_FINISHED_MESSAGE = "<hr>[Finished running code]";
+const CODE_ERROR_MESSAGE =
+  "Error during code execution. Check console for details.";
 
 // text colors for messages
 
-const CODE_START_END_MESSAGE_COLOR = "white"
-const CODE_ERROR_TEXT_COLOR = 'red';
+const CODE_START_END_MESSAGE_COLOR = "white";
+const CODE_ERROR_TEXT_COLOR = "red";
 
-const formatMessage = (message, colour) => `<span style="color:${colour}">${message}</span>`;
+const formatMessage = (message, colour) =>
+  `<span style="color:${colour}">${message}</span>`;
 
 const editor_template_code = `
 <template id="python-code-editor-template">
@@ -74,132 +76,154 @@ const editor_template_code = `
   </div>  
 </div>
 <!-- Code Editor -->
-</template>`
-
+</template>`;
 
 function initializeCodeMirror(element, initialValue) {
-    // Function to initialize CodeMirror for an element
-    const editor = CodeMirror(element, {
-        lineNumbers: true,
-        indentUnit: 4,
-        tabSize: 4,
-        mode: 'python',
-        value:  initialValue || "print('Hello, Python')",
-        theme: 'dracula',
-        keyMap: 'sublime',
-        readOnly: false,
-        lineWrapping: true,
-        indentWithTabs: true,
-    });
+  // Function to initialize CodeMirror for an element
+  const editor = CodeMirror(element, {
+    lineNumbers: true,
+    indentUnit: 4,
+    tabSize: 4,
+    mode: "python",
+    value: initialValue || "print('Hello, Python')",
+    theme: "dracula",
+    keyMap: "sublime",
+    readOnly: false,
+    lineWrapping: true,
+    indentWithTabs: true,
+  });
 
-    const outputBox = $(element).closest('.code-editor').find('.output-box .code-output-content');
-    const runButton = $(element).closest('.code-editor').find('.editor-play-button');
-    const copyButton = $(element).closest('.code-editor').find('.editor-copy-button');
-    const clearButton = $(element).closest('.code-editor').find('.editor-clear-button');
+  const outputBox = $(element)
+    .closest(".code-editor")
+    .find(".output-box .code-output-content");
 
-    return {
-        editor: editor,
-        outputBox: outputBox,
-        runButton: runButton,
-        copyButton: copyButton,
-        clearButton: clearButton
-    };
+  const runButton = $(element)
+    .closest(".code-editor")
+    .find(".editor-play-button");
+
+  const copyButton = $(element)
+    .closest(".code-editor")
+    .find(".editor-copy-button");
+  
+    const clearButton = $(element)
+    .closest(".code-editor")
+    .find(".editor-clear-button");
+
+  return {
+    editor: editor,
+    outputBox: outputBox,
+    runButton: runButton,
+    copyButton: copyButton,
+    clearButton: clearButton,
+  };
 }
-
 
 function applyRunButton(runButton, editor, outputBox) {
-    // Function to apply on runButton
-    runButton.on('click', async function () {
-        const pythonCode = editor.getValue();
+  // Function to apply on runButton
+  runButton.on("click", async function () {
+    const pythonCode = editor.getValue();
 
-        try {
-          outputBox.text('')
-          outputBox.append(formatMessage(CODE_RUNNING_MESSAGE, CODE_START_END_MESSAGE_COLOR));
-  
-          const { results, error } = await asyncRun(pythonCode);
-  
-          if (error) {
-              outputBox.append(formatMessage(CODE_ERROR_MESSAGE, CODE_ERROR_TEXT_COLOR));
-          } else {
-              outputBox.append(results);
-          }
-      } catch (error) {
-          console.error('Error during code execution:', error);
-          outputBox.append(formatMessage(CODE_ERROR_MESSAGE, CODE_ERROR_TEXT_COLOR));
-      } finally {
-          outputBox.append(formatMessage(CODE_FINISHED_MESSAGE, CODE_START_END_MESSAGE_COLOR));
+    try {
+      outputBox.text("");
+      outputBox.append(
+        formatMessage(CODE_RUNNING_MESSAGE, CODE_START_END_MESSAGE_COLOR)
+      );
+
+      const { results, error } = await asyncRun(pythonCode);
+
+      if (error) {
+        outputBox.append(
+          formatMessage(CODE_ERROR_MESSAGE, CODE_ERROR_TEXT_COLOR)
+        );
+      } else {
+        outputBox.append(results);
       }
-    });
+    } catch (error) {
+      console.error("Error during code execution:", error);
+      outputBox.append(
+        formatMessage(CODE_ERROR_MESSAGE, CODE_ERROR_TEXT_COLOR)
+      );
+    } finally {
+      outputBox.append(
+        formatMessage(CODE_FINISHED_MESSAGE, CODE_START_END_MESSAGE_COLOR)
+      );
+    }
+  });
 }
 
-
 function applyCopyButton(copyButton, editor) {
-    // Function to apply on copyButton
+  // Function to apply on copyButton
 
-    copyButton.on('click', function () {
-        const code = editor.getValue();
-        copyButton.prop('disabled', true)
-        
-        navigator.clipboard.writeText(textToCopy)
-            .then(() => copyButton.prop('disabled', false))
-            .catch(err => {
-                console.error('Unable to copy text to clipboard', err);
-                copyButton.prop('disabled', false);
-            });
-    });
+  copyButton.on("click", function () {
+    const code = editor.getValue();
+    copyButton.prop("disabled", true);
+
+    navigator.clipboard
+      .writeText(code)
+      .then(() => copyButton.prop("disabled", false))
+      .catch((err) => {
+        console.error("Unable to copy text to clipboard", err);
+        copyButton.prop("disabled", false);
+      });
+  });
 }
 
 function applyClearButton(clearButton, editor, outputBox) {
-    // Function to apply on clearButton
-    clearButton.on('click', function () {
-        editor.setValue("");
-        outputBox.text("");
-    });
+  // Function to apply on clearButton
+  clearButton.on("click", function () {
+    editor.setValue("");
+    outputBox.text("");
+  });
 }
 
 async function getGistCode(gistLink) {
-  const rawGistCodeLink = gistLink ? gistLink.replace(".js", "/raw/").replace("gist.github.com", "gist.githubusercontent.com") : null;
+  const rawGistCodeLink = gistLink
+    ? gistLink
+        .replace(".js", "/raw/")
+        .replace("gist.github.com", "gist.githubusercontent.com")
+    : null;
 
   if (!rawGistCodeLink) {
-      return "";
+    return "";
   }
 
   try {
-      const response = await fetch(rawGistCodeLink);
+    const response = await fetch(rawGistCodeLink);
 
-      if (!response.ok) {
-          throw new Error(`Failed to fetch Gist code. Status: ${response.status}`);
-      }
+    if (!response.ok) {
+      throw new Error(`Failed to fetch Gist code. Status: ${response.status}`);
+    }
 
-      return await response.text();
+    return await response.text();
   } catch (error) {
-      console.error("Error fetching Gist code:", error);
-      return ""; 
+    console.error("Error fetching Gist code:", error);
+    return "";
   }
 }
 
 $(document).ready(async function () {
-    const editor_template = $(editor_template_code);
+  const editor_template = $(editor_template_code);
 
-    // Select all elements with the class "python-editor"
-    const requested_editors = $(".python-editor");
+  // Select all elements with the class "python-editor"
+  const requested_editors = $(".python-editor");
 
-    requested_editors.each(async function (index, box) {
-        $(box).append(editor_template.html());
+  requested_editors.each(async function (index, box) {
+    $(box).append(editor_template.html());
 
-        const gistLink = $(box).attr("data-gist-src");
+    const gistLink = $(box).attr("data-gist-src");
 
-        console.log(gistLink)
+    // console.log(gistLink)
 
-        const initailCode = await getGistCode(gistLink)
+    const initailCode = await getGistCode(gistLink);
 
-        console.log(initailCode)
+    // console.log(initailCode)
 
-        const { editor, outputBox, runButton, copyButton, clearButton } = initializeCodeMirror($(box).find('.codemirror-box')[0], initailCode);
+    const { editor, outputBox, runButton, copyButton, clearButton } =
+      initializeCodeMirror($(box).find(".codemirror-box")[0], initailCode);
 
-        // Apply functions on buttons
-        applyRunButton(runButton, editor, outputBox);
-        applyCopyButton(copyButton, editor);
-        applyClearButton(clearButton, editor, outputBox);
-    });
+    // Apply functions on buttons
+    applyRunButton(runButton, editor, outputBox);
+    applyCopyButton(copyButton, editor);
+    applyClearButton(clearButton, editor, outputBox);
+  });
 });
