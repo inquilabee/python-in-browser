@@ -1,3 +1,7 @@
+
+![Python in Browser](https://github.com/inquilabee/python-in-browser/blob/main/data/python-editor.png "Python in Browser")
+
+
 # Code Editor with Python Support
 
 This is a feature-rich web-based code editor with Python language support. It includes features such as executing Python code using Web Workers, FontAwesome icons, support for multiple editor instances, and a guide on how to run a simple Python server for testing purposes.
