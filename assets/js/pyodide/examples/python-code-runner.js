@@ -1,28 +1,23 @@
-// test script 
+// test script
 // do not use elsewhere
 
-import { asyncRun } from "../workers/py-worker.js";
+import { asyncRun } from '../workers/py-worker.js'
 
+async function run_code(script, context = {}) {
+    try {
+        // console.log("Running code", script)
 
-async function run_code(script, context={}) {
-  try {
+        const { results, error } = await asyncRun(script, context)
 
-    // console.log("Running code", script)
-
-    const { results, error } = await asyncRun(script, context);
-
-    if (results) {
-      console.log("pyodideWorker return results: ", results);
-    } else if (error) {
-      console.log("pyodideWorker error: ", error);
+        if (results) {
+            console.log('pyodideWorker return results: ', results)
+        } else if (error) {
+            console.log('pyodideWorker error: ', error)
+        }
+    } catch (e) {
+        console.log(`Error in pyodideWorker at ${e.filename}, Line: ${e.lineno}, ${e.message}`)
     }
-  } catch (e) {
-    console.log(
-      `Error in pyodideWorker at ${e.filename}, Line: ${e.lineno}, ${e.message}`,
-    );
-  }
 }
-
 
 let py_script_1 = `
 import js
@@ -56,8 +51,8 @@ if __name__ == "__main__":
 `
 
 const py_context = {
-  A_rank: [0.8, 0.4, 1.2, 3.7, 2.6, 5.8],
-};
+    A_rank: [0.8, 0.4, 1.2, 3.7, 2.6, 5.8],
+}
 
-run_code(py_script_2, py_context);
-run_code(py_script_1, py_context); 
+run_code(py_script_2, py_context)
+run_code(py_script_1, py_context)

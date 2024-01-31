@@ -1,19 +1,19 @@
-import { asyncRun } from "../pyodide/workers/py-worker.js";
+import { asyncRun } from '../pyodide/workers/py-worker.js'
+
+import { formatPython } from '../utils/py-format.js'
 
 // Console messages
 
-const CODE_RUNNING_MESSAGE = "[Started running code]<hr>";
-const CODE_FINISHED_MESSAGE = "<hr>[Finished running code]";
-const CODE_ERROR_MESSAGE =
-  "Error during code execution. Check console for details.";
+const CODE_RUNNING_MESSAGE = '[Started running code]<hr>'
+const CODE_FINISHED_MESSAGE = '<hr>[Finished running code]'
+const CODE_ERROR_MESSAGE = 'Error during code execution. Check console for details.'
 
 // text colors for messages
 
-const CODE_START_END_MESSAGE_COLOR = "white";
-const CODE_ERROR_TEXT_COLOR = "red";
+const CODE_START_END_MESSAGE_COLOR = 'white'
+const CODE_ERROR_TEXT_COLOR = 'red'
 
-const formatMessage = (message, colour) =>
-  `<span style="color:${colour}">${message}</span>`;
+const formatMessage = (message, color) => `<span style="color:${color}">${message}</span>`
 
 const editor_template_code = `
 <template id="python-code-editor-template">
@@ -76,154 +76,150 @@ const editor_template_code = `
   </div>  
 </div>
 <!-- Code Editor -->
-</template>`;
+</template>`
 
-function initializeCodeMirror(element, initialValue) {
-  // Function to initialize CodeMirror for an element
-  const editor = CodeMirror(element, {
-    lineNumbers: true,
-    indentUnit: 4,
-    tabSize: 4,
-    mode: "python",
-    value: initialValue || "print('Hello, Python')",
-    theme: "dracula",
-    keyMap: "sublime",
-    readOnly: false,
-    lineWrapping: true,
-    indentWithTabs: true,
-  });
+const initializeCodeMirror = (element, initialValue) => {
+    // Function to initialize CodeMirror for an element
+    const editor = CodeMirror(element, {
+        lineNumbers: true,
+        indentUnit: 4,
+        tabSize: 4,
+        mode: 'python',
+        value: initialValue || "print('Hello, Python')",
+        theme: 'dracula',
+        keyMap: 'sublime',
+        readOnly: false,
+        lineWrapping: true,
+        indentWithTabs: true,
+    })
 
-  const outputBox = $(element)
-    .closest(".code-editor")
-    .find(".output-box .code-output-content");
+    const outputBox = $(element).closest('.code-editor').find('.output-box .code-output-content')
 
-  const runButton = $(element)
-    .closest(".code-editor")
-    .find(".editor-play-button");
+    const runButton = $(element).closest('.code-editor').find('.editor-play-button')
 
-  const copyButton = $(element)
-    .closest(".code-editor")
-    .find(".editor-copy-button");
-  
-    const clearButton = $(element)
-    .closest(".code-editor")
-    .find(".editor-clear-button");
+    const copyButton = $(element).closest('.code-editor').find('.editor-copy-button')
 
-  return {
-    editor: editor,
-    outputBox: outputBox,
-    runButton: runButton,
-    copyButton: copyButton,
-    clearButton: clearButton,
-  };
-}
+    const clearButton = $(element).closest('.code-editor').find('.editor-clear-button')
 
-function applyRunButton(runButton, editor, outputBox) {
-  // Function to apply on runButton
-  runButton.on("click", async function () {
-    const pythonCode = editor.getValue();
+    return {
+        editor,
+        outputBox,
+        runButton,
+        copyButton,
+        clearButton,
+    }
+};
+
+const applyRunButton = (runButton, editor, outputBox) => {
+    // Function to apply on runButton
+    runButton.on('click', async () => {
+        const pythonCode = editor.getValue()
+
+        try {
+          outputBox.text('')
+          outputBox.append(formatMessage(CODE_RUNNING_MESSAGE, CODE_START_END_MESSAGE_COLOR))
+
+          const { results, error } = await asyncRun(pythonCode)
+
+          if (error) {
+            outputBox.append(formatMessage(CODE_ERROR_MESSAGE, CODE_ERROR_TEXT_COLOR))
+          } else {
+            outputBox.append(results)
+          }
+        } catch (error) {
+          console.error('Error during code execution:', error)
+          outputBox.append(formatMessage(CODE_ERROR_MESSAGE, CODE_ERROR_TEXT_COLOR))
+        } finally {
+          outputBox.append(formatMessage(CODE_FINISHED_MESSAGE, CODE_START_END_MESSAGE_COLOR))
+        }
+      })
+};
+
+const applyCopyButton = (copyButton, editor) => {
+    // Function to apply on copyButton
+
+    copyButton.on('click', () => {
+        const code = editor.getValue()
+        copyButton.prop('disabled', true)
+
+        navigator.clipboard
+            .writeText(code)
+            .then(() => copyButton.prop('disabled', false))
+            .catch((err) => {
+                console.error('Unable to copy text to clipboard', err)
+                copyButton.prop('disabled', false)
+            })
+    })
+};
+
+const applyClearButton = (clearButton, editor, outputBox) => {
+    // Function to apply on clearButton
+    clearButton.on('click', () => {
+        editor.setValue('')
+        outputBox.text('')
+    })
+};
+
+const getGistCode = async gistLink => {
+    function trimFromEnd(str, suffix) {
+        const regex = new RegExp(`${suffix}$`)
+        return str.replace(regex, '')
+    }
+
+    const rawGistCodeLink = gistLink
+        ? `${trimFromEnd(gistLink, '.js')}/raw/`.replace('gist.github.com', 'gist.githubusercontent.com')
+        : null
+
+    if (!rawGistCodeLink) {
+        return ''
+    }
 
     try {
-      outputBox.text("");
-      outputBox.append(
-        formatMessage(CODE_RUNNING_MESSAGE, CODE_START_END_MESSAGE_COLOR)
-      );
+        const response = await fetch(rawGistCodeLink)
 
-      const { results, error } = await asyncRun(pythonCode);
+        if (!response.ok) {
+            throw new Error(`Failed to fetch Gist code. Status: ${response.status}`)
+        }
 
-      if (error) {
-        outputBox.append(
-          formatMessage(CODE_ERROR_MESSAGE, CODE_ERROR_TEXT_COLOR)
-        );
-      } else {
-        outputBox.append(results);
-      }
+        return await response.text()
     } catch (error) {
-      console.error("Error during code execution:", error);
-      outputBox.append(
-        formatMessage(CODE_ERROR_MESSAGE, CODE_ERROR_TEXT_COLOR)
-      );
-    } finally {
-      outputBox.append(
-        formatMessage(CODE_FINISHED_MESSAGE, CODE_START_END_MESSAGE_COLOR)
-      );
+        console.error('Error fetching Gist code:', error)
+        return ''
     }
-  });
-}
+};
 
-function applyCopyButton(copyButton, editor) {
-  // Function to apply on copyButton
+$(document).ready(async () => {
+    const editor_template = $(editor_template_code)
 
-  copyButton.on("click", function () {
-    const code = editor.getValue();
-    copyButton.prop("disabled", true);
+    // Select all elements with the class "python-editor"
+    const requested_editors = $('.python-editor')
 
-    navigator.clipboard
-      .writeText(code)
-      .then(() => copyButton.prop("disabled", false))
-      .catch((err) => {
-        console.error("Unable to copy text to clipboard", err);
-        copyButton.prop("disabled", false);
-      });
-  });
-}
+    requested_editors.each(async (_index, box) => {
+        const box_content = $(box).text()
 
-function applyClearButton(clearButton, editor, outputBox) {
-  // Function to apply on clearButton
-  clearButton.on("click", function () {
-    editor.setValue("");
-    outputBox.text("");
-  });
-}
+        $(box).html('')
 
-async function getGistCode(gistLink) {
-  const rawGistCodeLink = gistLink
-    ? gistLink
-        .replace(".js", "/raw/")
-        .replace("gist.github.com", "gist.githubusercontent.com")
-    : null;
+        $(box).append(editor_template.html())
 
-  if (!rawGistCodeLink) {
-    return "";
-  }
+        const gistLink = $(box).attr('data-gist-src')
 
-  try {
-    const response = await fetch(rawGistCodeLink);
+        // console.log(gistLink)
 
-    if (!response.ok) {
-      throw new Error(`Failed to fetch Gist code. Status: ${response.status}`);
-    }
+        const initialCode =
+            box_content !== undefined && box_content !== null && $.trim(box_content) !== ''
+                ? formatPython(box_content)
+                : (await getGistCode(gistLink)) || ''
 
-    return await response.text();
-  } catch (error) {
-    console.error("Error fetching Gist code:", error);
-    return "";
-  }
-}
+        // console.log(initialCode)
 
-$(document).ready(async function () {
-  const editor_template = $(editor_template_code);
+        const { editor, outputBox, runButton, copyButton, clearButton } = initializeCodeMirror(
+            $(box).find('.codemirror-box')[0],
+            initialCode
+        )
 
-  // Select all elements with the class "python-editor"
-  const requested_editors = $(".python-editor");
-
-  requested_editors.each(async function (index, box) {
-    $(box).append(editor_template.html());
-
-    const gistLink = $(box).attr("data-gist-src");
-
-    // console.log(gistLink)
-
-    const initailCode = await getGistCode(gistLink);
-
-    // console.log(initailCode)
-
-    const { editor, outputBox, runButton, copyButton, clearButton } =
-      initializeCodeMirror($(box).find(".codemirror-box")[0], initailCode);
-
-    // Apply functions on buttons
-    applyRunButton(runButton, editor, outputBox);
-    applyCopyButton(copyButton, editor);
-    applyClearButton(clearButton, editor, outputBox);
-  });
-});
+        // Apply functions on buttons
+        applyRunButton(runButton, editor, outputBox)
+        applyCopyButton(copyButton, editor)
+        applyClearButton(clearButton, editor, outputBox)
+    })
+})

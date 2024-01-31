@@ -1,0 +1,28 @@
+# EditorConfig is awesome: https://EditorConfig.org
+
+# Top-most EditorConfig file
+root = true
+
+[*]
+charset = utf-8
+indent_style = space
+indent_size = 2
+end_of_line = lf
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+# HTML files
+[*.html]
+max_line_length = 120
+
+# CSS files
+[*.css]
+max_line_length = 120
+selector_separator_newline = true
+declaration_block_trailing_semicolon = always
+
+# JavaScript files
+[*.js]
+max_line_length = 120
+indent_size = 2
+brace_style = stroustrup

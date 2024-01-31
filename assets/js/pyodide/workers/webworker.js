@@ -1,26 +1,25 @@
 // webworker.js
-
-importScripts("https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js");
-
 // Main code: https://pyodide.org/en/stable/usage/webworker.html
 // Console Output Redirection: https://stackoverflow.com/questions/56583696/how-to-redirect-render-pyodide-output-in-browser
 // https://github.com/pyodide/pyodide/issues/8#issuecomment-772024841
 
+importScripts('https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js')
+
 function generateUniqueString(length = 8) {
-  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let randomString = '';
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+    let randomString = ''
 
-  for (let i = 0; i < length; i++) {
-      const randomIndex = Math.floor(Math.random() * characters.length);
-      randomString += characters.charAt(randomIndex);
-  }
+    for (let i = 0; i < length; i++) {
+        const randomIndex = Math.floor(Math.random() * characters.length)
+        randomString += characters.charAt(randomIndex)
+    }
 
-  return randomString;
+    return randomString
 }
 
 function setup_pyodide() {
-  // setup pyodide environment to run code blocks as needed
-  var setup_code = `
+    // setup pyodide environment to run code blocks as needed
+    var setup_code = `
 import sys, io, traceback
 namespace = {}  # use separate namespace to hide run_code, modules, etc.
 def run_code(code):
@@ -39,46 +38,46 @@ def run_code(code):
     sys.stderr = olderr
     return out.getvalue()
 `
-  self.pyodide.runPython(setup_code)
+    self.pyodide.runPython(setup_code)
 }
 
 async function loadPyodideAndPackages() {
-  self.pyodide = await loadPyodide();
+    self.pyodide = await loadPyodide()
 
-  await self.pyodide.loadPackage(["numpy", "pytz"]);
+    await self.pyodide.loadPackage(['numpy', 'pytz'])
 
-  setup_pyodide()
+    setup_pyodide()
 }
 
-let pyodideReadyPromise = loadPyodideAndPackages();
+let pyodideReadyPromise = loadPyodideAndPackages()
 
 self.onmessage = async (event) => {
-  await pyodideReadyPromise;
+    await pyodideReadyPromise
 
-  const { id, python, ...context } = event.data;
+    const { id, python, ...context } = event.data
 
-  Object.assign(self, context);
+    Object.assign(self, context)
 
-  try {
-    await self.pyodide.loadPackagesFromImports(python);
+    try {
+        await self.pyodide.loadPackagesFromImports(python)
 
-    const random_var = `code_to_run_${generateUniqueString(10)}`
+        const random_var = `code_to_run_${generateUniqueString(10)}`
 
-    // console.log(random_var)
+        // console.log(random_var)
 
-    self.pyodide.globals.set(random_var, python)
-    let results = await self.pyodide.runPythonAsync(`run_code(${random_var})`);
-    
-    self.postMessage({ results, id });
-    // below causes weird errors: Why? ;'(
-    // delete self.pyodide.globals[random_var]
+        self.pyodide.globals.set(random_var, python)
+        let results = await self.pyodide.runPythonAsync(`run_code(${random_var})`)
 
-    // Try this later, let it be for now
-    // setTimeout(() => {
-    //   // Delete the variable from globals after a short delay
-    //   delete self.pyodide.globals[random_var];
-    // }, 5000);
-  } catch (error) {
-    self.postMessage({ error: error.message, id });
-  }
-};
+        self.postMessage({ results, id })
+        // below causes weird errors: Why? ;'(
+        // delete self.pyodide.globals[random_var]
+
+        // Try this later, let it be for now
+        // setTimeout(() => {
+        //   // Delete the variable from globals after a short delay
+        //   delete self.pyodide.globals[random_var];
+        // }, 5000);
+    } catch (error) {
+        self.postMessage({ error: error.message, id })
+    }
+}
